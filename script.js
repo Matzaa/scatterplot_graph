@@ -1,10 +1,10 @@
 (function () {
-    function makeTimeNum(strArg) {
+    function makeDateObj(strArg) {
         let splitStr = strArg.split(":");
-        let noColon = splitStr[0] + splitStr[1];
-        let newNum = noColon * 1;
-        console.log("newNum :", newNum);
-        return newNum;
+        let dateObj = new Date(
+            `January 1, 1970 00:${splitStr[0]}:${splitStr[1]}`
+        );
+        return dateObj;
     }
 
     fetch(
@@ -12,10 +12,10 @@
     )
         .then((res) => res.json())
         .then((data) => {
-            console.log(data);
             data.forEach((d) => {
-                d.Time = makeTimeNum(d.Time);
+                d.Time = makeDateObj(d.Time);
             });
+            console.log("data: ", data);
             makeChart(data);
         });
 
@@ -37,7 +37,7 @@
             .range([padding, w - padding]);
 
         const yScale = d3
-            .scaleLinear()
+            .scaleTime()
             .domain([d3.min(data, (d) => d.Time), d3.max(data, (d) => d.Time)])
             .range([h - padding, padding]);
 
@@ -78,17 +78,8 @@
                 tooltip.style("visibility", "hidden");
             });
 
-        function makeTimeFormat(x) {
-            let numString = x.toString();
-            let timeOutput =
-                numString[0] + numString[1] + ":" + numString[2] + numString[3];
-            console.log("timeOutput", timeOutput);
-            return timeOutput;
-        }
-
-        makeTimeFormat(5543);
         const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
-        const yAxis = d3.axisLeft(yScale).tickFormat((x) => makeTimeFormat(x));
+        const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat("%M:%S"));
 
         svg.append("g")
             .attr("transform", `translate(0, ${h - padding})`)
