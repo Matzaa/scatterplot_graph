@@ -19,6 +19,7 @@
             makeChart(data);
         });
 
+    const formatTime = d3.timeFormat("%M:%S");
     function makeChart(data) {
         const h = 500;
         const w = 1000;
@@ -89,10 +90,10 @@
             .append("circle")
             .attr("class", "dot")
             .attr("r", 5)
-            .attr("data-xvalue", (d, i) => d.Year)
-            .attr("data-yvalue", (d) => d.Time)
-            .attr("cx", (d, i) => xScale(d.Year))
-            .attr("cy", (d) => h - yScale(d.Time))
+            .attr("data-xvalue", (d) => d.Year)
+            .attr("data-yvalue", (d) => d.Time.toISOString())
+            .attr("cx", (d) => xScale(d.Year))
+            .attr("cy", (d) => yScale(d.Time))
             .attr("fill", (d) => {
                 if (d.Doping === "") {
                     return "rgb(255, 123, 123)";
@@ -100,14 +101,21 @@
                     return "gray";
                 }
             })
-            .on("mouseover", function (e) {
+            .on("mouseover", function (event, d) {
+                console.log("d :", d);
                 tooltip
-                    .style("left", e.pageX + "px")
-                    .style("top", e.pageY - 30 + "px")
+                    .style("left", event.pageX - 100 + "px")
+                    .style("top", event.pageY - 20 + "px")
                     .style("transform", "translateX(100px)")
                     .style("visibility", "visible")
-                    .attr("data-year", this.getAttribute("data-xvalue"))
-                    .html(`${this.getAttribute("data-xvalue")}`);
+                    .attr(
+                        "data-year",
+                        d.Year
+                    ).html(`<p>${d.Name},${d.Nationality}</p>
+                    <p>place:${d.Place}</p>
+                    <p>${d.Doping}</p>
+                    <p>Time:${formatTime(d.Time)}</p>
+                    `);
             })
             .on("mouseout", () => {
                 tooltip.style("visibility", "hidden");
@@ -130,7 +138,7 @@
 
         svg.append("text")
             .attr("transform", "rotate(-90)")
-            .attr("x", -260)
+            .attr("x", -330)
             .attr("y", 40)
             .text("Time in Minutes")
             .attr("class", "text");
