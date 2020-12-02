@@ -31,15 +31,22 @@
             .attr("height", h)
             .style("background-color", "pink");
 
+        // scale
+
         const xScale = d3
             .scaleLinear()
-            .domain([d3.min(data, (d) => d.Year), d3.max(data, (d) => d.Year)])
+            .domain([
+                d3.min(data, (d) => d.Year - 1),
+                d3.max(data, (d) => d.Year + 1),
+            ])
             .range([padding, w - padding]);
 
         const yScale = d3
             .scaleTime()
             .domain([d3.min(data, (d) => d.Time), d3.max(data, (d) => d.Time)])
             .range([h - padding, padding]);
+
+        // tooltip
 
         const tooltip = d3
             .select("body")
@@ -49,11 +56,32 @@
             .attr("visibility", "hidden")
             .text("probe");
 
-        const legend = d3
-            .select("body")
-            .append("div")
+        // legend
+
+        const legend = svg
+            .append("g")
             .attr("id", "legend")
-            .html("I'm legend");
+            .attr("transform", `translate(${w * 0.72}, ${padding + 5})`);
+
+        legend
+            .append("circle")
+            .attr("r", 10)
+            .attr("fill", "rgb(255, 123, 123)");
+        legend
+            .append("circle")
+            .attr("r", 10)
+            .attr("fill", "gray")
+            .attr("transform", `translate(0, 30)`);
+        legend
+            .append("text")
+            .text("No doping allegations")
+            .attr("transform", `translate(15, 5)`);
+        legend
+            .append("text")
+            .text("With doping allegations")
+            .attr("transform", `translate(15, 35)`);
+
+        // graph
 
         svg.selectAll("circle")
             .data(data)
@@ -65,10 +93,17 @@
             .attr("data-yvalue", (d) => d.Time)
             .attr("cx", (d, i) => xScale(d.Year))
             .attr("cy", (d) => h - yScale(d.Time))
+            .attr("fill", (d) => {
+                if (d.Doping === "") {
+                    return "rgb(255, 123, 123)";
+                } else {
+                    return "gray";
+                }
+            })
             .on("mouseover", function (e) {
                 tooltip
-                    .style("left", d3.event.pageX + "px")
-                    .style("top", d3.event.pageY - 30 + "px")
+                    .style("left", e.pageX + "px")
+                    .style("top", e.pageY - 30 + "px")
                     .style("transform", "translateX(100px)")
                     .style("visibility", "visible")
                     .attr("data-year", this.getAttribute("data-xvalue"))
@@ -77,6 +112,8 @@
             .on("mouseout", () => {
                 tooltip.style("visibility", "hidden");
             });
+
+        // axis
 
         const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
         const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat("%M:%S"));
@@ -90,5 +127,18 @@
             .attr("transform", `translate(${padding}, 0)`)
             .attr("id", "y-axis")
             .call(yAxis);
+
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -260)
+            .attr("y", 40)
+            .text("Time in Minutes")
+            .attr("class", "text");
+
+        svg.append("text")
+            .attr("x", w / 2 - padding / 2)
+            .attr("y", h - padding / 2)
+            .text("YEARS")
+            .attr("class", "text");
     }
 })();
