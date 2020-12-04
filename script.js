@@ -44,7 +44,7 @@
 
         const yScale = d3
             .scaleTime()
-            .domain([d3.min(data, (d) => d.Time), d3.max(data, (d) => d.Time)])
+            .domain([d3.max(data, (d) => d.Time), d3.min(data, (d) => d.Time)])
             .range([h - padding, padding]);
 
         // tooltip
@@ -52,10 +52,8 @@
         const tooltip = d3
             .select("body")
             .append("div")
-            .style("z-index", "10")
             .attr("id", "tooltip")
-            .attr("visibility", "hidden")
-            .text("probe");
+            .text(" ");
 
         // legend
 
@@ -111,10 +109,12 @@
                     .attr(
                         "data-year",
                         d.Year
-                    ).html(`<p>${d.Name},${d.Nationality}</p>
-                    <p>place:${d.Place}</p>
+                    ).html(`<p>${d.Name} of ${d.Nationality}</p>
+              
                     <p>${d.Doping}</p>
-                    <p>Time:${formatTime(d.Time)}</p>
+                    <p>Time:${formatTime(
+                        d.Time
+                    )}&nbsp &nbsp &nbsp<span>place:${d.Place}</span></p>
                     `);
             })
             .on("mouseout", () => {
